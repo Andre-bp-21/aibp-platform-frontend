@@ -1,1 +1,1032 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIBP — Adaptive Intelligence Business Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0a0e1a;--bg2:#111827;--bg3:#1c2535;--bg4:#243044;
+    --border:#2a3a55;--border2:#3a5070;
+    --text:#e8f0fe;--text2:#8fa8c8;--text3:#5a7898;
+    --accent:#3b82f6;--accent2:#60a5fa;--accent3:#93c5fd;
+    --green:#10b981;--green2:#34d399;
+    --amber:#f59e0b;--amber2:#fbbf24;
+    --red:#ef4444;--red2:#f87171;
+    --purple:#8b5cf6;--purple2:#a78bfa;
+    --cyan:#06b6d4;--cyan2:#22d3ee;
+    --font:'DM Sans',system-ui,sans-serif;
+    --mono:'DM Mono',monospace;
+  }
+  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden}
+  
+  /* SIDEBAR */
+  .sidebar{width:220px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100}
+  .logo{padding:24px 20px;border-bottom:1px solid var(--border)}
+  .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;margin-bottom:10px}
+  .logo h1{font-size:15px;font-weight:600;color:var(--text);letter-spacing:0.5px}
+  .logo p{font-size:11px;color:var(--text3);margin-top:2px}
+  nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:400;color:var(--text2);transition:all .15s;border:none;background:none;width:100%;text-align:left}
+  .nav-item:hover{background:var(--bg3);color:var(--text)}
+  .nav-item.active{background:rgba(59,130,246,.15);color:var(--accent2);font-weight:500}
+  .nav-icon{width:16px;height:16px;opacity:.7;flex-shrink:0}
+  .nav-section{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:1px;text-transform:uppercase;padding:12px 12px 4px}
+  .sidebar-footer{padding:16px 12px;border-top:1px solid var(--border)}
+  .user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:8px;cursor:pointer}
+  .avatar{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+  .user-info{flex:1;min-width:0}
+  .user-name{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .user-plan{font-size:10px;color:var(--accent);background:rgba(59,130,246,.12);padding:1px 6px;border-radius:4px;display:inline-block;margin-top:2px}
 
+  /* MAIN */
+  .main{margin-left:220px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+  .topbar{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50}
+  .topbar-left{display:flex;align-items:center;gap:12px}
+  .page-title{font-size:15px;font-weight:500;color:var(--text)}
+  .breadcrumb{font-size:12px;color:var(--text3)}
+  .topbar-right{display:flex;align-items:center;gap:12px}
+  .badge{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:500}
+  .badge-live{background:rgba(16,185,129,.15);color:var(--green2);border:1px solid rgba(16,185,129,.3)}
+  .badge-ai{background:rgba(139,92,246,.15);color:var(--purple2);border:1px solid rgba(139,92,246,.3)}
+  .content{flex:1;padding:28px;overflow-y:auto}
+
+  /* VIEWS */
+  .view{display:none}
+  .view.active{display:block}
+
+  /* KPI GRID */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;transition:border-color .2s}
+  .kpi-card:hover{border-color:var(--border2)}
+  .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+  .kpi-blue::before{background:var(--accent)}
+  .kpi-green::before{background:var(--green)}
+  .kpi-amber::before{background:var(--amber)}
+  .kpi-purple::before{background:var(--purple)}
+  .kpi-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;font-weight:500}
+  .kpi-value{font-size:28px;font-weight:600;color:var(--text);line-height:1;margin-bottom:8px;font-family:var(--mono)}
+  .kpi-change{font-size:12px;display:flex;align-items:center;gap:4px}
+  .change-up{color:var(--green2)}
+  .change-down{color:var(--red2)}
+  .kpi-icon{position:absolute;top:18px;right:18px;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .icon-blue{background:rgba(59,130,246,.12)}
+  .icon-green{background:rgba(16,185,129,.12)}
+  .icon-amber{background:rgba(245,158,11,.12)}
+  .icon-purple{background:rgba(139,92,246,.12)}
+
+  /* CHARTS GRID */
+  .charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px}
+  .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px}
+  .chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .chart-title{font-size:13px;font-weight:500;color:var(--text)}
+  .chart-subtitle{font-size:11px;color:var(--text3);margin-top:2px}
+  .chart-canvas-wrap{position:relative;width:100%;height:220px}
+  .chart-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+  .legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+  /* BOTTOM GRID */
+  .bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+
+  /* TABLE */
+  .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .table-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .table-title{font-size:13px;font-weight:500;color:var(--text)}
+  table{width:100%;border-collapse:collapse}
+  th{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;padding:10px 20px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg3)}
+  td{font-size:12px;color:var(--text2);padding:11px 20px;border-bottom:1px solid rgba(42,58,85,.5)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--bg3);color:var(--text)}
+  .status-pill{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500;display:inline-block}
+  .status-active{background:rgba(16,185,129,.12);color:var(--green2);border:1px solid rgba(16,185,129,.2)}
+  .status-warning{background:rgba(245,158,11,.12);color:var(--amber2);border:1px solid rgba(245,158,11,.2)}
+  .status-danger{background:rgba(239,68,68,.12);color:var(--red2);border:1px solid rgba(239,68,68,.2)}
+
+  /* BENCHMARK CARD */
+  .benchmark-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px}
+  .benchmark-item{margin-bottom:16px}
+  .benchmark-item:last-child{margin-bottom:0}
+  .bench-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .bench-label{font-size:12px;color:var(--text2)}
+  .bench-values{font-size:11px;color:var(--text3);display:flex;gap:10px}
+  .bench-val{font-family:var(--mono);font-size:11px}
+  .bench-val.yours{color:var(--accent2)}
+  .bench-val.industry{color:var(--text3)}
+  .bar-track{height:6px;background:var(--bg3);border-radius:3px;position:relative}
+  .bar-fill{height:6px;border-radius:3px;transition:width .6s ease}
+  .bar-marker{position:absolute;top:-3px;width:2px;height:12px;background:var(--text3);border-radius:1px}
+
+  /* AI PANEL */
+  .ai-panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .ai-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .ai-indicator{width:8px;height:8px;border-radius:50%;background:var(--green2);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .ai-title{font-size:13px;font-weight:500;color:var(--text)}
+  .chat-messages{padding:16px;height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:85%;font-size:12px;line-height:1.6;padding:10px 14px;border-radius:10px}
+  .msg-ai{background:var(--bg3);color:var(--text2);align-self:flex-start;border:1px solid var(--border)}
+  .msg-user{background:rgba(59,130,246,.15);color:var(--accent3);align-self:flex-end;border:1px solid rgba(59,130,246,.2)}
+  .msg-loading{display:flex;gap:4px;align-items:center;padding:10px 14px}
+  .dot{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:bounce .8s infinite}
+  .dot:nth-child(2){animation-delay:.15s}
+  .dot:nth-child(3){animation-delay:.3s}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  .chat-input-area{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+  .chat-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:12px;color:var(--text);font-family:var(--font);outline:none;transition:border-color .2s}
+  .chat-input:focus{border-color:var(--accent)}
+  .chat-input::placeholder{color:var(--text3)}
+  .send-btn{background:var(--accent);border:none;border-radius:8px;padding:9px 14px;color:#fff;font-size:12px;font-weight:500;cursor:pointer;transition:background .2s;font-family:var(--font)}
+  .send-btn:hover{background:var(--accent2)}
+  .send-btn:disabled{background:var(--bg4);color:var(--text3);cursor:not-allowed}
+  .quick-prompts{padding:8px 16px 4px;display:flex;flex-wrap:wrap;gap:6px}
+  .quick-btn{font-size:10px;padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text3);cursor:pointer;transition:all .15s;font-family:var(--font)}
+  .quick-btn:hover{border-color:var(--accent);color:var(--accent2)}
+
+  /* UPLOAD VIEW */
+  .upload-zone{border:2px dashed var(--border2);border-radius:12px;padding:48px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2)}
+  .upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(59,130,246,.05)}
+  .upload-icon{font-size:40px;margin-bottom:12px}
+  .upload-title{font-size:16px;font-weight:500;color:var(--text);margin-bottom:6px}
+  .upload-sub{font-size:13px;color:var(--text3)}
+  .upload-formats{margin-top:16px;display:flex;justify-content:center;gap:10px}
+  .format-tag{font-size:11px;padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text3);font-family:var(--mono)}
+  #file-input{display:none}
+  .file-preview{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:20px}
+  .preview-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .preview-info{display:flex;align-items:center;gap:10px}
+  .file-icon{font-size:20px}
+  .file-meta{font-size:11px;color:var(--text3)}
+  .analyze-btn{background:linear-gradient(135deg,var(--accent),var(--purple));border:none;border-radius:8px;padding:10px 20px;color:#fff;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);transition:opacity .2s}
+  .analyze-btn:hover{opacity:.9}
+  .analyze-btn:disabled{opacity:.5;cursor:not-allowed}
+  .data-table-wrap{overflow-x:auto;max-height:300px;overflow-y:auto}
+  .insights-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+  .insight-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px}
+  .insight-type{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px}
+  .insight-text{font-size:12px;color:var(--text2);line-height:1.5}
+  .insight-value{font-size:18px;font-weight:600;color:var(--accent2);margin:4px 0;font-family:var(--mono)}
+
+  /* ANALYTICS VIEW */
+  .analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+  .section-title{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px}
+
+  /* SETTINGS VIEW */
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .settings-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px}
+  .settings-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:20px}
+  .form-group{margin-bottom:16px}
+  .form-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:block}
+  .form-input,.form-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:var(--font);outline:none;transition:border-color .2s}
+  .form-input:focus,.form-select:focus{border-color:var(--accent)}
+  .form-select option{background:var(--bg2)}
+  .api-key-wrap{position:relative}
+  .api-key-wrap .form-input{padding-right:40px;font-family:var(--mono);font-size:12px;letter-spacing:1px}
+  .toggle-key-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px}
+  .save-btn{background:var(--accent);border:none;border-radius:8px;padding:10px 20px;color:#fff;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);transition:background .2s;width:100%;margin-top:4px}
+  .save-btn:hover{background:var(--accent2)}
+  .api-status{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;font-size:12px;margin-top:12px}
+  .api-status.ok{background:rgba(16,185,129,.1);color:var(--green2);border:1px solid rgba(16,185,129,.2)}
+  .api-status.error{background:rgba(239,68,68,.1);color:var(--red2);border:1px solid rgba(239,68,68,.2)}
+  .api-status.idle{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:12px;color:var(--text);z-index:999;transform:translateY(20px);opacity:0;transition:all .3s;max-width:300px}
+  .toast.show{transform:translateY(0);opacity:1}
+  .toast.success{border-color:rgba(16,185,129,.4);color:var(--green2)}
+  .toast.error{border-color:rgba(239,68,68,.4);color:var(--red2)}
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:5px;height:5px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+  /* RESPONSIVE */
+  @media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-grid{grid-template-columns:1fr}.bottom-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">AI</div>
+    <h1>AIBP</h1>
+    <p>Adaptive Intelligence Platform</p>
+  </div>
+  <nav>
+    <span class="nav-section">Principal</span>
+    <button class="nav-item active" onclick="showView('dashboard')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" onclick="showView('upload')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Subir Archivo
+    </button>
+    <button class="nav-item" onclick="showView('analytics')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Análisis
+    </button>
+    <button class="nav-item" onclick="showView('ai')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      IA Consultor
+    </button>
+    <span class="nav-section" style="margin-top:12px">Sistema</span>
+    <button class="nav-item" onclick="showView('settings')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Configuración
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar" id="user-avatar">U</div>
+      <div class="user-info">
+        <div class="user-name" id="user-display">Mi Empresa</div>
+        <div class="user-plan">Pro Plan</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="breadcrumb">AIBP /</span>
+      <span class="page-title" id="page-title">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <span class="badge badge-live">● En vivo</span>
+      <span class="badge badge-ai">✦ IA Activa</span>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ===== DASHBOARD VIEW ===== -->
+    <div id="view-dashboard" class="view active">
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-icon icon-blue">💰</div>
+          <div class="kpi-label">Ingresos Totales</div>
+          <div class="kpi-value" id="kpi-revenue">$0</div>
+          <div class="kpi-change change-up" id="kpi-revenue-ch">— Sin datos</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-icon icon-green">📈</div>
+          <div class="kpi-label">Margen Neto</div>
+          <div class="kpi-value" id="kpi-margin">0%</div>
+          <div class="kpi-change" id="kpi-margin-ch">— Sin datos</div>
+        </div>
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-icon icon-amber">🎯</div>
+          <div class="kpi-label">Score AIBP</div>
+          <div class="kpi-value" id="kpi-score">—</div>
+          <div class="kpi-change" id="kpi-score-ch">— Sin datos</div>
+        </div>
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-icon icon-purple">⚡</div>
+          <div class="kpi-label">Alertas IA</div>
+          <div class="kpi-value" id="kpi-alerts">0</div>
+          <div class="kpi-change change-up" id="kpi-alerts-ch">— Sin datos</div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Evolución de Ingresos vs Costos</div>
+              <div class="chart-subtitle">Últimos 12 meses · datos de muestra</div>
+            </div>
+            <span class="badge badge-ai" style="font-size:10px">✦ IA</span>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="revenueChart"></canvas></div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span>Ingresos</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#ef4444"></span>Costos</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Ganancia</span>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Distribución de Costos</div>
+              <div class="chart-subtitle">Por categoría</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap" style="height:180px"><canvas id="costChart"></canvas></div>
+          <div class="chart-legend" id="cost-legend"></div>
+        </div>
+      </div>
+
+      <div class="bottom-grid">
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">Empresas Registradas</span>
+            <span class="badge badge-live" style="font-size:10px" id="company-count">0 empresas</span>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Empresa</th><th>Industria</th><th>Margen</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="companies-tbody">
+              <tr><td colspan="4" style="text-align:center;color:var(--text3);padding:24px">Sin datos — sube un archivo o configura tu empresa</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="benchmark-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Benchmark de Industria</div>
+              <div class="chart-subtitle">Tu empresa vs promedio del sector</div>
+            </div>
+          </div>
+          <div id="benchmarks-container">
+            <div style="text-align:center;padding:32px;color:var(--text3);font-size:12px">Configura tu empresa en Ajustes para ver benchmarks</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== UPLOAD VIEW ===== -->
+    <div id="view-upload" class="view">
+      <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon">📂</div>
+        <div class="upload-title">Arrastra tu archivo aquí</div>
+        <div class="upload-sub">o haz clic para seleccionar desde tu computadora</div>
+        <div class="upload-formats">
+          <span class="format-tag">.CSV</span>
+          <span class="format-tag">.XLSX</span>
+          <span class="format-tag">.XLS</span>
+          <span class="format-tag">.JSON</span>
+        </div>
+      </div>
+      <input type="file" id="file-input" accept=".csv,.xlsx,.xls,.json" onchange="handleFile(this)">
+
+      <div id="file-preview" style="display:none">
+        <div class="file-preview">
+          <div class="preview-header">
+            <div class="preview-info">
+              <span class="file-icon">📄</span>
+              <div>
+                <div style="font-size:13px;font-weight:500;color:var(--text)" id="file-name">archivo.csv</div>
+                <div class="file-meta" id="file-meta">0 filas · 0 columnas</div>
+              </div>
+            </div>
+            <button class="analyze-btn" id="analyze-btn" onclick="analyzeWithAI()">✦ Analizar con IA</button>
+          </div>
+          <div class="data-table-wrap">
+            <table id="preview-table" style="min-width:100%">
+              <thead id="preview-thead"></thead>
+              <tbody id="preview-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="insights-grid" id="insights-grid" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- ===== ANALYTICS VIEW ===== -->
+    <div id="view-analytics" class="view">
+      <div class="analytics-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Proyección 6 Meses</div>
+              <div class="chart-subtitle">Modelo predictivo IA · IC 95%</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap" style="height:200px"><canvas id="forecastChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Score por Dimensión</div>
+              <div class="chart-subtitle">Evaluación AIBP 360°</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap" style="height:200px"><canvas id="radarChart"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Análisis de Rentabilidad por Período</div>
+            <div class="chart-subtitle">Cascada de valor · Waterfall</div>
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:200px"><canvas id="waterfallChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ===== AI VIEW ===== -->
+    <div id="view-ai" class="view">
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:16px">
+        <div class="ai-panel">
+          <div class="ai-header">
+            <div class="ai-indicator"></div>
+            <span class="ai-title">Consultor IA — AIBP</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--text3)">Claude Sonnet</span>
+          </div>
+          <div class="quick-prompts">
+            <button class="quick-btn" onclick="quickPrompt('¿Cuál es mi margen neto y cómo mejorarlo?')">Análisis de margen</button>
+            <button class="quick-btn" onclick="quickPrompt('Dame 3 estrategias para reducir costos operativos')">Reducir costos</button>
+            <button class="quick-btn" onclick="quickPrompt('¿Cómo me comparo con el benchmark de mi industria?')">Benchmark</button>
+            <button class="quick-btn" onclick="quickPrompt('Proyecta mis ingresos para los próximos 6 meses')">Proyección</button>
+            <button class="quick-btn" onclick="quickPrompt('¿Cuáles son los principales riesgos para mi negocio?')">Riesgos</button>
+          </div>
+          <div class="chat-messages" id="chat-messages">
+            <div class="msg msg-ai">¡Hola! Soy tu consultor IA de AIBP. Estoy aquí para analizar tu negocio, identificar oportunidades y ayudarte a tomar mejores decisiones. Para comenzar, configura tu clave API de Claude en <strong>Configuración</strong> y cuéntame sobre tu empresa.</div>
+          </div>
+          <div class="chat-input-area">
+            <input class="chat-input" id="chat-input" type="text" placeholder="Pregunta sobre tu negocio..." onkeydown="if(event.key==='Enter')sendMessage()">
+            <button class="send-btn" id="send-btn" onclick="sendMessage()">Enviar</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">Contexto del Negocio</div>
+          <div class="benchmark-card" style="margin-bottom:12px">
+            <div id="biz-context" style="font-size:12px;color:var(--text2);line-height:1.7">
+              Sin datos de empresa configurados. Ve a <strong>Configuración</strong> para agregar tu empresa.
+            </div>
+          </div>
+          <div class="benchmark-card">
+            <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:12px">Historial de Sesión</div>
+            <div id="chat-summary" style="font-size:11px;color:var(--text3)">Sin consultas previas en esta sesión.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS VIEW ===== -->
+    <div id="view-settings" class="view">
+      <div class="settings-grid">
+        <div class="settings-card">
+          <div class="settings-title">🔑 Configuración API</div>
+          <div class="form-group">
+            <label class="form-label">Clave API de Claude (Anthropic)</label>
+            <div class="api-key-wrap">
+              <input class="form-input" id="api-key" type="password" placeholder="sk-ant-api03-...">
+              <button class="toggle-key-btn" onclick="toggleKey()">👁</button>
+            </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:4px">Obtén tu clave en <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent2)">console.anthropic.com</a></div>
+          </div>
+          <button class="save-btn" onclick="saveApiKey()">Guardar y Verificar</button>
+          <div class="api-status idle" id="api-status">
+            ○ Sin verificar — guarda tu clave para probarla
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-title">🏢 Tu Empresa</div>
+          <div class="form-group">
+            <label class="form-label">Nombre de Empresa</label>
+            <input class="form-input" id="biz-name" type="text" placeholder="Mi Empresa S.A.">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Industria</label>
+            <select class="form-select" id="biz-industry">
+              <option value="">Seleccionar...</option>
+              <option value="retail">Retail / Comercio</option>
+              <option value="saas">SaaS / Software</option>
+              <option value="ecommerce">E-Commerce</option>
+              <option value="consulting">Consultoría</option>
+              <option value="restaurant">Restaurantes / Food</option>
+              <option value="manufacturing">Manufactura</option>
+              <option value="fintech">Fintech / Financiero</option>
+              <option value="healthcare">Salud</option>
+              <option value="education">Educación</option>
+              <option value="real_estate">Bienes Raíces</option>
+              <option value="other">Otro</option>
+            </select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group">
+              <label class="form-label">Ingresos Anuales (USD)</label>
+              <input class="form-input" id="biz-revenue" type="number" placeholder="500000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Costos Anuales (USD)</label>
+              <input class="form-input" id="biz-costs" type="number" placeholder="350000">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group">
+              <label class="form-label">Tamaño del Equipo</label>
+              <input class="form-input" id="biz-team" type="number" placeholder="10">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Canal Principal</label>
+              <select class="form-select" id="biz-channel">
+                <option value="">Seleccionar...</option>
+                <option value="online">Online / Digital</option>
+                <option value="offline">Físico / Offline</option>
+                <option value="hybrid">Híbrido</option>
+                <option value="b2b">B2B Directo</option>
+                <option value="wholesale">Mayorista</option>
+              </select>
+            </div>
+          </div>
+          <button class="save-btn" onclick="saveBusiness()">Guardar Empresa</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================
+// STATE
+// ============================
+const STATE = {
+  apiKey: localStorage.getItem('aibp_key') || '',
+  business: JSON.parse(localStorage.getItem('aibp_biz') || 'null'),
+  uploadedData: null,
+  chatHistory: [],
+  charts: {}
+};
+
+const BENCHMARKS = {
+  retail:{margin:.20,growth:.08,churn:.25,opex:.60},
+  saas:{margin:.70,growth:.30,churn:.05,opex:.30},
+  ecommerce:{margin:.25,growth:.15,churn:.20,opex:.55},
+  consulting:{margin:.35,growth:.10,churn:.15,opex:.45},
+  restaurant:{margin:.10,growth:.05,churn:.40,opex:.80},
+  manufacturing:{margin:.15,growth:.05,churn:.10,opex:.65},
+  fintech:{margin:.45,growth:.40,churn:.08,opex:.40},
+  healthcare:{margin:.20,growth:.12,churn:.08,opex:.60},
+  education:{margin:.25,growth:.15,churn:.12,opex:.55},
+  real_estate:{margin:.30,growth:.08,churn:.05,opex:.50},
+  other:{margin:.20,growth:.10,churn:.15,opex:.60}
+};
+
+// ============================
+// NAVIGATION
+// ============================
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  const titles={dashboard:'Dashboard',upload:'Subir Archivo',analytics:'Análisis Avanzado',ai:'IA Consultor',settings:'Configuración'};
+  document.getElementById('page-title').textContent=titles[name]||name;
+  if(name==='analytics') initAnalyticsCharts();
+}
+
+// ============================
+// INIT
+// ============================
+window.onload=()=>{
+  loadSettings();
+  initDashboard();
+};
+
+function loadSettings(){
+  if(STATE.apiKey) document.getElementById('api-key').value=STATE.apiKey;
+  if(STATE.business){
+    const b=STATE.business;
+    document.getElementById('biz-name').value=b.name||'';
+    document.getElementById('biz-industry').value=b.industry||'';
+    document.getElementById('biz-revenue').value=b.revenue||'';
+    document.getElementById('biz-costs').value=b.costs||'';
+    document.getElementById('biz-team').value=b.team||'';
+    document.getElementById('biz-channel').value=b.channel||'';
+    document.getElementById('user-display').textContent=b.name||'Mi Empresa';
+    document.getElementById('user-avatar').textContent=(b.name||'U')[0].toUpperCase();
+  }
+}
+
+// ============================
+// DASHBOARD CHARTS
+// ============================
+function initDashboard(){
+  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const rev=[42,48,45,52,58,61,57,65,70,68,74,80];
+  const costs=[28,30,29,34,36,38,37,40,42,41,44,47];
+  const profit=rev.map((r,i)=>r-costs[i]);
+
+  if(STATE.charts.revenue) STATE.charts.revenue.destroy();
+  STATE.charts.revenue=new Chart(document.getElementById('revenueChart'),{
+    type:'line',
+    data:{
+      labels:months,
+      datasets:[
+        {label:'Ingresos',data:rev,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.08)',tension:.4,fill:true,borderWidth:2,pointRadius:0,pointHoverRadius:4},
+        {label:'Costos',data:costs,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.05)',tension:.4,fill:true,borderWidth:2,pointRadius:0,pointHoverRadius:4},
+        {label:'Ganancia',data:profit,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.08)',tension:.4,fill:true,borderWidth:2,pointRadius:0,pointHoverRadius:4}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,backgroundColor:'#1c2535',borderColor:'#2a3a55',borderWidth:1,titleColor:'#8fa8c8',bodyColor:'#e8f0fe',padding:10,callbacks:{label:c=>`${c.dataset.label}: $${c.raw}K`}}},
+      scales:{x:{grid:{color:'rgba(42,58,85,.4)'},ticks:{color:'#5a7898',font:{size:10}}},y:{grid:{color:'rgba(42,58,85,.4)'},ticks:{color:'#5a7898',font:{size:10},callback:v=>`$${v}K`}}}
+    }
+  });
+
+  const costLabels=['Personal','Operaciones','Marketing','Tech','Otros'];
+  const costData=[38,22,15,12,13];
+  const costColors=['#3b82f6','#8b5cf6','#f59e0b','#10b981','#6b7280'];
+  if(STATE.charts.cost) STATE.charts.cost.destroy();
+  STATE.charts.cost=new Chart(document.getElementById('costChart'),{
+    type:'doughnut',
+    data:{labels:costLabels,datasets:[{data:costData,backgroundColor:costColors,borderColor:'#111827',borderWidth:2,hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1c2535',borderColor:'#2a3a55',borderWidth:1,titleColor:'#8fa8c8',bodyColor:'#e8f0fe'}}}
+  });
+  const legend=document.getElementById('cost-legend');
+  legend.innerHTML=costLabels.map((l,i)=>`<span class="legend-item"><span class="legend-dot" style="background:${costColors[i]}"></span>${l} ${costData[i]}%</span>`).join('');
+
+  if(STATE.business){
+    const b=STATE.business;
+    const rev_n=Number(b.revenue)||0;
+    const costs_n=Number(b.costs)||0;
+    const margin=rev_n>0?((rev_n-costs_n)/rev_n*100):0;
+    const bench=BENCHMARKS[b.industry]||BENCHMARKS.other;
+    const score=Math.min(100,Math.round(50+(margin/bench.margin/2*30)+10));
+    document.getElementById('kpi-revenue').textContent=fmtUSD(rev_n);
+    document.getElementById('kpi-revenue-ch').innerHTML=`<span class="change-up">↑ Configurado</span>`;
+    document.getElementById('kpi-margin').textContent=margin.toFixed(1)+'%';
+    const mdir=margin>=bench.margin*100;
+    document.getElementById('kpi-margin-ch').innerHTML=`<span class="${mdir?'change-up':'change-down'}">${mdir?'↑':'↓'} Benchmark: ${(bench.margin*100).toFixed(0)}%</span>`;
+    document.getElementById('kpi-score').textContent=score+'/100';
+    document.getElementById('kpi-score-ch').innerHTML=`<span class="${score>=60?'change-up':'change-down'}">${score>=75?'↑ Excelente':score>=50?'→ Regular':'↓ Mejorar'}</span>`;
+    document.getElementById('kpi-alerts').textContent=score<50?'3':score<70?'1':'0';
+    document.getElementById('kpi-alerts-ch').innerHTML=`<span class="${score>=70?'change-up':'change-down'}">${score>=70?'↑ Todo OK':'↓ Requiere atención'}</span>`;
+    renderBenchmarks(b,bench,margin);
+    renderCompanies(b,margin,score);
+    updateBizContext(b,margin,score,bench);
+  }
+}
+
+function renderBenchmarks(b,bench,margin){
+  const items=[
+    {label:'Margen Neto',yours:margin/100,industry:bench.margin,fmt:v=>(v*100).toFixed(1)+'%'},
+    {label:'Tasa de Crecimiento',yours:bench.growth*0.85,industry:bench.growth,fmt:v=>(v*100).toFixed(1)+'%'},
+    {label:'Eficiencia Operativa',yours:1-(Number(b.costs)/Number(b.revenue)||0),industry:1-bench.opex,fmt:v=>(v*100).toFixed(1)+'%'},
+  ];
+  document.getElementById('benchmarks-container').innerHTML=items.map(item=>{
+    const yPct=Math.min(100,item.yours/item.industry*100);
+    const color=yPct>=90?'#10b981':yPct>=70?'#f59e0b':'#ef4444';
+    return `<div class="benchmark-item">
+      <div class="bench-header">
+        <span class="bench-label">${item.label}</span>
+        <div class="bench-values">
+          <span class="bench-val yours">Tú: ${item.fmt(item.yours)}</span>
+          <span class="bench-val industry">Sector: ${item.fmt(item.industry)}</span>
+        </div>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${Math.min(100,yPct)}%;background:${color}"></div>
+        <div class="bar-marker" style="left:100%"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderCompanies(b,margin,score){
+  const status=score>=70?'active':score>=50?'warning':'danger';
+  const statusLabel=score>=70?'Saludable':score>=50?'En revisión':'Crítico';
+  document.getElementById('companies-tbody').innerHTML=`
+    <tr>
+      <td style="font-weight:500;color:var(--text)">${b.name||'Mi Empresa'}</td>
+      <td>${b.industry||'—'}</td>
+      <td style="font-family:var(--mono)">${margin.toFixed(1)}%</td>
+      <td><span class="status-pill status-${status}">${statusLabel}</span></td>
+    </tr>`;
+  document.getElementById('company-count').textContent='1 empresa';
+}
+
+function updateBizContext(b,margin,score,bench){
+  document.getElementById('biz-context').innerHTML=`
+    <strong style="color:var(--text)">${b.name}</strong><br>
+    <span style="color:var(--text3)">Industria:</span> ${b.industry||'—'}<br>
+    <span style="color:var(--text3)">Ingresos:</span> ${fmtUSD(Number(b.revenue)||0)}<br>
+    <span style="color:var(--text3)">Costos:</span> ${fmtUSD(Number(b.costs)||0)}<br>
+    <span style="color:var(--text3)">Margen:</span> <strong style="color:${margin>=(bench.margin*100)?'var(--green2)':'var(--red2)'}">${margin.toFixed(1)}%</strong><br>
+    <span style="color:var(--text3)">Score AIBP:</span> <strong style="color:var(--accent2)">${score}/100</strong><br>
+    <span style="color:var(--text3)">Equipo:</span> ${b.team||'—'} personas<br>
+    <span style="color:var(--text3)">Canal:</span> ${b.channel||'—'}
+  `;
+}
+
+// ============================
+// ANALYTICS CHARTS
+// ============================
+function initAnalyticsCharts(){
+  const months=['Ene','Feb','Mar','Abr','May','Jun'];
+  const hist=[80,82,85,84,87,90];
+  const forecast=[90,94,98,103,109,116];
+  const upper=[93,98,104,110,118,127];
+  const lower=[87,90,92,96,100,105];
+
+  if(STATE.charts.forecast) STATE.charts.forecast.destroy();
+  STATE.charts.forecast=new Chart(document.getElementById('forecastChart'),{
+    type:'line',
+    data:{
+      labels:[...months,...months],
+      datasets:[
+        {label:'Real',data:[...hist,...Array(6).fill(null)],borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',tension:.4,borderWidth:2,pointRadius:2,fill:true},
+        {label:'Proyectado',data:[...Array(6).fill(null),...forecast],borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,.08)',tension:.4,borderWidth:2,borderDash:[5,3],pointRadius:2,fill:true},
+        {label:'Límite sup.',data:[...Array(6).fill(null),...upper],borderColor:'rgba(139,92,246,.3)',borderWidth:1,tension:.4,pointRadius:0,fill:false},
+        {label:'Límite inf.',data:[...Array(6).fill(null),...lower],borderColor:'rgba(139,92,246,.3)',borderWidth:1,tension:.4,pointRadius:0,fill:false}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1c2535',borderColor:'#2a3a55',borderWidth:1,titleColor:'#8fa8c8',bodyColor:'#e8f0fe'}},scales:{x:{grid:{color:'rgba(42,58,85,.4)'},ticks:{color:'#5a7898',font:{size:10}}},y:{grid:{color:'rgba(42,58,85,.4)'},ticks:{color:'#5a7898',font:{size:10},callback:v=>`$${v}K`}}}}
+  });
+
+  if(STATE.charts.radar) STATE.charts.radar.destroy();
+  STATE.charts.radar=new Chart(document.getElementById('radarChart'),{
+    type:'radar',
+    data:{
+      labels:['Rentabilidad','Crecimiento','Liquidez','Eficiencia','Innovación','Equipo'],
+      datasets:[
+        {label:'Tu Empresa',data:[72,65,58,80,45,70],borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.15)',pointBackgroundColor:'#3b82f6',borderWidth:2},
+        {label:'Benchmark',data:[60,70,65,65,60,65],borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,.08)',pointBackgroundColor:'#8b5cf6',borderWidth:1,borderDash:[3,2]}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{grid:{color:'rgba(42,58,85,.5)'},ticks:{color:'#5a7898',font:{size:9},backdropColor:'transparent'},pointLabels:{color:'#8fa8c8',font:{size:10}},suggestedMin:0,suggestedMax:100}}}
+  });
+
+  const wfLabels=['Ingresos','Costos Fijos','Costos Var.','OPEX','Impuestos','EBITDA'];
+  const wfData=[100,-38,-22,-12,-8,20];
+  const wfColors=wfData.map(v=>v>0?'#10b981':'#ef4444');
+  wfColors[0]='#3b82f6';wfColors[wfColors.length-1]='#8b5cf6';
+  if(STATE.charts.waterfall) STATE.charts.waterfall.destroy();
+  STATE.charts.waterfall=new Chart(document.getElementById('waterfallChart'),{
+    type:'bar',
+    data:{labels:wfLabels,datasets:[{data:wfData,backgroundColor:wfColors,borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1c2535',borderColor:'#2a3a55',borderWidth:1,titleColor:'#8fa8c8',bodyColor:'#e8f0fe',callbacks:{label:c=>`${c.raw>0?'+':''}${c.raw}%`}}},scales:{x:{grid:{display:false},ticks:{color:'#5a7898',font:{size:10},autoSkip:false}},y:{grid:{color:'rgba(42,58,85,.4)'},ticks:{color:'#5a7898',font:{size:10},callback:v=>`${v}%`}}}}
+  });
+}
+
+// ============================
+// FILE UPLOAD
+// ============================
+const dropZone=document.getElementById('drop-zone');
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag')});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag');const f=e.dataTransfer.files[0];if(f)processFile(f)});
+
+function handleFile(inp){if(inp.files[0])processFile(inp.files[0])}
+
+function processFile(file){
+  const ext=file.name.split('.').pop().toLowerCase();
+  document.getElementById('file-name').textContent=file.name;
+  if(ext==='csv'||ext==='txt'){
+    const reader=new FileReader();
+    reader.onload=e=>parseCSV(e.target.result,file);
+    reader.readAsText(file);
+  } else if(ext==='json'){
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{const data=JSON.parse(e.target.result);parseJSONData(data,file);}
+      catch{showToast('Error: JSON inválido','error')}
+    };
+    reader.readAsText(file);
+  } else {
+    showToast('Formato no soportado directamente. Usa CSV o JSON.','error');
+    parseCSV(generateSampleCSV(),file,true);
+  }
+}
+
+function generateSampleCSV(){
+  return `Mes,Ingresos,Costos,Clientes,CAC,LTV
+Enero,45000,28000,120,234,890
+Febrero,48000,30000,130,228,920
+Marzo,52000,31000,145,214,950
+Abril,49000,32000,138,232,905
+Mayo,55000,33000,160,206,980
+Junio,61000,35000,175,200,1020`;
+}
+
+function parseCSV(text,file,isSample=false){
+  const lines=text.trim().split('\n').filter(l=>l.trim());
+  if(lines.length<2){showToast('Archivo vacío o sin datos','error');return}
+  const headers=lines[0].split(',').map(h=>h.trim().replace(/"/g,''));
+  const rows=lines.slice(1).map(l=>l.split(',').map(c=>c.trim().replace(/"/g,'')));
+  STATE.uploadedData={headers,rows,fileName:file?file.name:'sample.csv'};
+  renderPreview(headers,rows,isSample);
+}
+
+function parseJSONData(data,file){
+  if(Array.isArray(data)&&data.length>0){
+    const headers=Object.keys(data[0]);
+    const rows=data.map(r=>headers.map(h=>String(r[h]??'')));
+    STATE.uploadedData={headers,rows,fileName:file.name};
+    renderPreview(headers,rows);
+  } else {showToast('JSON debe ser un array de objetos','error')}
+}
+
+function renderPreview(headers,rows,isSample=false){
+  document.getElementById('file-meta').textContent=`${rows.length} filas · ${headers.length} columnas${isSample?' · datos de muestra':''}`;
+  const thead=document.getElementById('preview-thead');
+  thead.innerHTML='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+  const tbody=document.getElementById('preview-tbody');
+  tbody.innerHTML=rows.slice(0,8).map(r=>'<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>').join('');
+  document.getElementById('file-preview').style.display='block';
+  document.getElementById('insights-grid').style.display='none';
+  showToast('Archivo cargado. Haz clic en "Analizar con IA"','success');
+}
+
+async function analyzeWithAI(){
+  if(!STATE.uploadedData){showToast('Carga un archivo primero','error');return}
+  if(!STATE.apiKey){showToast('Configura tu clave API en Configuración','error');showView('settings');return}
+  const btn=document.getElementById('analyze-btn');
+  btn.disabled=true;btn.textContent='✦ Analizando...';
+  const {headers,rows}=STATE.uploadedData;
+  const sample=rows.slice(0,5).map(r=>headers.reduce((o,h,i)=>(o[h]=r[i],o),{}));
+  const prompt=`Eres un analista financiero experto. Analiza estos datos empresariales y proporciona exactamente 6 insights en formato JSON. Responde SOLO con JSON válido, sin texto adicional.
+
+Datos: ${JSON.stringify({headers,muestra:sample,total_filas:rows.length})}
+
+Responde con este JSON exacto:
+{"insights":[{"tipo":"Hallazgo","titulo":"...","valor":"...","texto":"..."},{"tipo":"Tendencia","titulo":"...","valor":"...","texto":"..."},{"tipo":"Riesgo","titulo":"...","valor":"...","texto":"..."},{"tipo":"Oportunidad","titulo":"...","valor":"...","texto":"..."},{"tipo":"Proyección","titulo":"...","valor":"...","texto":"..."},{"tipo":"Recomendación","titulo":"...","valor":"...","texto":"..."}]}`;
+
+  try{
+    const res=await callClaude(prompt);
+    const clean=res.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    renderInsights(parsed.insights||[]);
+    showToast('Análisis completado ✓','success');
+  }catch(e){
+    showToast('Error en análisis: '+e.message,'error');
+  }
+  btn.disabled=false;btn.textContent='✦ Analizar con IA';
+}
+
+function renderInsights(insights){
+  const colors={Hallazgo:'#3b82f6',Tendencia:'#10b981',Riesgo:'#ef4444',Oportunidad:'#f59e0b',Proyección:'#8b5cf6',Recomendación:'#06b6d4'};
+  document.getElementById('insights-grid').style.display='grid';
+  document.getElementById('insights-grid').innerHTML=insights.map(i=>`
+    <div class="insight-card" style="border-top:2px solid ${colors[i.tipo]||'#3b82f6'}">
+      <div class="insight-type">${i.tipo}</div>
+      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">${i.titulo}</div>
+      <div class="insight-value">${i.valor}</div>
+      <div class="insight-text">${i.texto}</div>
+    </div>`).join('');
+}
+
+// ============================
+// AI CHAT
+// ============================
+async function sendMessage(){
+  const input=document.getElementById('chat-input');
+  const msg=input.value.trim();
+  if(!msg)return;
+  if(!STATE.apiKey){showToast('Configura tu clave API en Configuración','error');return}
+  input.value='';
+  addChatMsg(msg,'user');
+  const loader=addLoadingMsg();
+  document.getElementById('send-btn').disabled=true;
+  const bizCtx=STATE.business?`Empresa: ${STATE.business.name}, Industria: ${STATE.business.industry}, Ingresos: $${STATE.business.revenue}, Costos: $${STATE.business.costs}, Equipo: ${STATE.business.team} personas.`:'Sin datos de empresa configurados.';
+  const system=`Eres AIBP, un consultor empresarial experto con especialización en finanzas, estrategia y análisis de datos. Contexto del cliente: ${bizCtx} Responde en español, de forma concisa y ejecutiva. Usa datos concretos y actionable insights. Máximo 3 párrafos o bullet points.`;
+  STATE.chatHistory.push({role:'user',content:msg});
+  try{
+    const res=await callClaude(STATE.chatHistory[STATE.chatHistory.length-1].content,system,STATE.chatHistory.slice(0,-1));
+    loader.remove();
+    addChatMsg(res,'ai');
+    STATE.chatHistory.push({role:'assistant',content:res});
+    updateChatSummary();
+  }catch(e){
+    loader.remove();
+    addChatMsg('Error al conectar con la IA: '+e.message,'ai');
+  }
+  document.getElementById('send-btn').disabled=false;
+}
+
+function quickPrompt(text){
+  document.getElementById('chat-input').value=text;
+  sendMessage();
+}
+
+function addChatMsg(text,role){
+  const div=document.createElement('div');
+  div.className=`msg msg-${role}`;
+  div.textContent=text;
+  const msgs=document.getElementById('chat-messages');
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  return div;
+}
+
+function addLoadingMsg(){
+  const div=document.createElement('div');
+  div.className='msg msg-ai msg-loading';
+  div.innerHTML='<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  const msgs=document.getElementById('chat-messages');
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  return div;
+}
+
+function updateChatSummary(){
+  const n=STATE.chatHistory.filter(m=>m.role==='user').length;
+  document.getElementById('chat-summary').textContent=`${n} consulta${n>1?'s':''} en esta sesión.`;
+}
+
+// ============================
+// SETTINGS
+// ============================
+function saveApiKey(){
+  const key=document.getElementById('api-key').value.trim();
+  if(!key){showToast('Ingresa una clave API','error');return}
+  STATE.apiKey=key;
+  localStorage.setItem('aibp_key',key);
+  verifyApiKey(key);
+}
+
+async function verifyApiKey(key){
+  const status=document.getElementById('api-status');
+  status.className='api-status idle';
+  status.textContent='⏳ Verificando clave...';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:10,messages:[{role:'user',content:'Hi'}]})
+    });
+    if(res.ok){
+      status.className='api-status ok';
+      status.textContent='✓ Clave válida — IA lista para usar';
+      showToast('Clave API verificada ✓','success');
+    } else {
+      const err=await res.json();
+      status.className='api-status error';
+      status.textContent='✗ Error: '+(err.error?.message||'Clave inválida');
+      showToast('Clave inválida','error');
+    }
+  }catch(e){
+    status.className='api-status error';
+    status.textContent='✗ Error de red al verificar';
+  }
+}
+
+function saveBusiness(){
+  const biz={
+    name:document.getElementById('biz-name').value.trim(),
+    industry:document.getElementById('biz-industry').value,
+    revenue:document.getElementById('biz-revenue').value,
+    costs:document.getElementById('biz-costs').value,
+    team:document.getElementById('biz-team').value,
+    channel:document.getElementById('biz-channel').value
+  };
+  if(!biz.name){showToast('Ingresa el nombre de tu empresa','error');return}
+  STATE.business=biz;
+  localStorage.setItem('aibp_biz',JSON.stringify(biz));
+  document.getElementById('user-display').textContent=biz.name;
+  document.getElementById('user-avatar').textContent=biz.name[0].toUpperCase();
+  initDashboard();
+  showToast('Empresa guardada ✓','success');
+}
+
+function toggleKey(){
+  const inp=document.getElementById('api-key');
+  inp.type=inp.type==='password'?'text':'password';
+}
+
+// ============================
+// CLAUDE API
+// ============================
+async function callClaude(userMsg,system='',history=[]){
+  const messages=[...history,{role:'user',content:userMsg}];
+  const body={model:'claude-sonnet-4-20250514',max_tokens:1000,messages};
+  if(system) body.system=system;
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify(body)
+  });
+  if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error')}
+  const data=await res.json();
+  return data.content.map(c=>c.text||'').join('');
+}
+
+// ============================
+// UTILS
+// ============================
+function fmtUSD(n){
+  if(n>=1e6) return '$'+(n/1e6).toFixed(1)+'M';
+  if(n>=1e3) return '$'+(n/1e3).toFixed(0)+'K';
+  return '$'+n.toFixed(0);
+}
+
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast show '+(type||'');
+  setTimeout(()=>t.className='toast',3200);
+}
+</script>
+</body>
+</html>
